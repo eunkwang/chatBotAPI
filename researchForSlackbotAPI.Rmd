@@ -1,0 +1,34 @@
+---
+title: "slackChatbot"
+author: "eunkwang"
+date: '2017 12 18 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+ 
+
+# 슬랙 챗봇 만들기
+
+## 리서치
+    
+참고 페이지 : https://github.com/eunkwang/chatBotAPI.git
+
+내용 요약
+
+1. API로 서빙하기 위한 function 만들기
+    + 네이버 연관 검색어 함수로 진행
+2. R plumber 를 이용하여 함수를 API 간단히 wrapping 할 수 있음
+3.  + URL의 파라미터로 함수 파라미터를 서빙하면 웹 페이지로 결과 값을 리턴하는 구조임
+4. R Plumber를 리모트로 호스팅하기
+    + 기본적으로 plumber를 PC 환경에서 구동하면 로컬 네트워크 상에서만 서비스가 가능하기 때문에
+    + 슬랙으로 서빙하기 위해서는 외부에 오픈된 형태로 진행이 되어야 함
+    + 따라서 호스팅 수단이 필요
+    + 현재는 개인 서버를 호스팅 시스템으로 활용
+    + 최종 배포는 도커로 할 예정임
+5. 슬랙에 API 연결하기
+    + ![설정 메뉴](https://images.techhive.com/images/article/2017/02/slackmenu1-100709640-large.jpg)
+    + ![](https://images.techhive.com/images/article/2017/02/slackmenu3-100709641-large.jpg)
+    
