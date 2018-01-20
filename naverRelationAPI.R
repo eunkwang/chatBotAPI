@@ -1,6 +1,8 @@
 library(rvest)
 library(stringr)
 library(lava)
+library(slackr)
+
 
 #' @get /naverRelation1
 naverRelation1 <- function(text, token){
@@ -25,7 +27,7 @@ naverRelation1 <- function(text, token){
   } else {
     result <- "Service not available"
   } 
-  
+  # shell(cmd = 'Rscript.exe .R', wait=FALSE)
   return(result)
 }
 

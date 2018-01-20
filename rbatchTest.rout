@@ -1,0 +1,149 @@
+
+R version 3.4.3 (2017-11-30) -- "Kite-Eating Tree"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> source("/home/eunkwang/R/chatBotAPI/naverRelation.R")
+> source("/home/eunkwang/R/chatBotAPI/saveResult.R")
+> 
+> pacman::p_load('reshape2', 'igraph', 'rdevteam', 'ggraph',
++                'tidytext', 'tidyr', 'dplyr', 'data.table',
++                'rdevteam', 'slackr')
+> 
+> nvrGraph <- function(input = '사과'){
++   if(is.character(input) == TRUE){
++     ## loading data
++     d1 <- naverRelation1(input)
++     df <- naverRelation2(input)
++     
++     ## preprocessed data
++     d2 <- data.frame(R1 = input, R2 = d1)
++     df_union <- rbind(d2, df)
++     
++     ## save Data to DB
++     saveHistory(df_union)
++     
++     ## network object
++     
++     df_g <- graph.data.frame(df_union)
++     
++     V(df_g)$label.cex <- ifelse(V(df_g)$name == input, 2,
++                                 ifelse(V(df_g)$name %in% d1, 1, 0.7))
++     
++     colbar <- rainbow(length(d1)+1)
++     V(df_g)$label.color <- ifelse(input == V(df_g)$name, "red",
++                                   ifelse(V(df_g)$name %in% d1, colbar, "gray50"))
++     
++     V(df_g)$label.font <- ifelse(input == V(df_g)$name, 2,
++                                  ifelse(V(df_g)$name %in% d1, 2, 1))
++     
++     ## Source: http://stackoverflow.com/a/28722680/496488
++     layout.by.attr <- function(graph, wc, cluster.strength=1,layout=layout.auto) {
++       g <- graph.edgelist(get.edgelist(graph)) # create a lightweight copy of graph w/o the attributes.
++       E(g)$weight <- 1
++       
++       attr <- cbind(id=1:vcount(g), val=wc)
++       g <- g +  igraph::edges(unlist(t(attr)), weight=cluster.strength)
++       
++       l <- layout(g, weights=E(g)$weight)[1:vcount(graph),]
++       return(l)
++     }
++     
++     ## network plotting
++     
++     print("slackR 메시지를 보냅니다.")
++     
++     text_slackr(paste0(input,'에 대한 연관검색결과입니다.'), channel = '#99_결과물_테스트')
++     
++     print("차트를 그립니다")
++     
++     plot(df_g,
++          layout = layout.by.attr(df_g, wc = 1, cluster.strength = 1),
++          vertex.shape = "none",
++          edge.arrow.size=0.3,
++          edge.width=1.5,
++          edge.color="gray80",
++          main = paste0(input, "의 연관검색네트워크")
++     )
++     print("차트작성완료")
++     
++     
++     slackr::slackrSetup()
++     tmp <- httr::POST("https://slack.com/api/users.list", body=list(token=Sys.getenv("SLACK_API_TOKEN")))
++     jsonlite::fromJSON(httr::content(tmp, as="text"))
++     print(tmp)
++     
++     dev.slackr("#99_결과물_테스트")
++     
++     
++     dev.off()
++     
++     print("차트 파일을 저장합니다.")
++     
++     ## save png file
++     filename = paste0("image/", format(Sys.Date(), "%Y%m%d"), "_", input,".png")
++     png(filename)
++     plot(df_g,
++          layout = layout.by.attr(df_g, wc = 1, cluster.strength = 1),
++          vertex.shape = "none",
++          edge.arrow.size=0.3,
++          edge.width=1.5,
++          edge.color="gray80",
++          main = paste0(input, "의 연관검색네트워크")
++     )
++     dev.off()
++     
++   } else {
++     print("input is not character type")
++   }
++   
++ }
+> 
+> args <- (commandArgs(TRUE))
+> 
+> nvrGraph(args)
+Loading required package: rvest
+Loading required package: xml2
+Loading required package: stringr
+Loading required package: lava
+lava version 1.5.1
+
+Attaching package: ‘lava’
+
+The following object is masked from ‘package:dplyr’:
+
+    vars
+
+The following objects are masked from ‘package:igraph’:
+
+    compare, path
+
+[1] "저장하였습니다."
+[1] "slackR 메시지를 보냅니다."
+[1] "차트를 그립니다"
+[1] "차트작성완료"
+Response [https://slack.com/api/users.list]
+  Date: 2018-01-09 16:21
+  Status: 200
+  Content-Type: application/json; charset=utf-8
+  Size: 33 B
+
+Error: `by` can't contain join column `id` which is missing from LHS
+In addition: There were 50 or more warnings (use warnings() to see the first 50)
+Execution halted
